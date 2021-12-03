@@ -1,11 +1,8 @@
 
-#include "drivers.h"
-#include "orders.h"
+#include "main.h"
 
-int main()
+int main(int argc, char **argv)
 {
-    Drivers::init_drivers(42);
-    Orders order;
-    order.Activate(8);
+    Program::Run(argc, argv);
     return 0;
 }
