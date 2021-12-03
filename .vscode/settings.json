@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "program.h": "c",
+        "simlib.h": "c",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "optional": "cpp",
+        "algorithm": "cpp",
+        "random": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "typeinfo": "cpp"
+    }
+}

@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17 -Wall -Wextra -MMD
+CFLAGS = -std=c++17 -Wall -Wextra -g -MMD
 BUILD_DIR = ../build/
 EXE = ../sim
 SRC = $(wildcard *.cpp)
