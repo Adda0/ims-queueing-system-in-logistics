@@ -1,13 +1,8 @@
 #include "program.h"
 
 unsigned Program::_cars(3);
-unsigned Program::_bikes(5);
-unsigned Program::_orderSpan(300);
-unsigned Program::_orderSpanPeak(0);
-unsigned Program::_deliveryTime(3600);
-unsigned Program::_travel(900);
-unsigned Program::_travelMin(0);
-unsigned Program::_travelMax(0);
+unsigned Program::_bikes(6);
+unsigned Program::_deliveryTime(60);
 
 void Program::Run(int argc, char **argv)
 {
@@ -38,13 +33,21 @@ void Program::Run(int argc, char **argv)
 
 void Program::ParseArguments(int argc, char **argv)
 {
+    unsigned orderSpan{5};
+    unsigned orderSpanRushHour{0};
+    unsigned orderPreparation{5};
+    unsigned travel{10};
+    unsigned travelMin{0};
+    unsigned travelMax{0};
+
     // accepted long options
     static struct option longOptions[] =
     {
         {"bikes",         0, nullptr, 'b'},
         {"cars",          0, nullptr, 'c'},
-        {"order-span",    0, nullptr, 'o'},
-        {"peak-span",     0, nullptr, 'p'},
+        {"order",         0, nullptr, 'o'},
+        {"rush",          0, nullptr, 'r'},
+        {"preparation",   0, nullptr, 'p'},
         {"help",          0, nullptr, 'h'},
         {"delivery",      0, nullptr, 'd'},
         {"travel",        0, nullptr, 't'},
@@ -85,7 +88,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                _orderSpan = converter;
+                orderSpan = converter;
                 break;
             
             case 'd':
@@ -96,14 +99,23 @@ void Program::ParseArguments(int argc, char **argv)
                 }
                 _deliveryTime = converter;
                 break;
-            
+
             case 'p':
                 converter = stoul(optarg);
                 if (converter > UINT32_MAX)
                 {
                     throw exception();
                 }
-                _orderSpanPeak = converter;
+                orderPreparation = converter;
+                break;
+            
+            case 'r':
+                converter = stoul(optarg);
+                if (converter > UINT32_MAX)
+                {
+                    throw exception();
+                }
+                orderSpanRushHour = converter;
                 break;
             
             case 't':
@@ -112,7 +124,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                _travel = converter;
+                travel = converter;
                 break;
             
             case 'n':
@@ -121,7 +133,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                _travelMin = converter;
+                travelMin = converter;
                 break;
             
             case 'x':
@@ -130,7 +142,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                _travelMax = converter;
+                travelMax = converter;
                 break;
 
             case 'h':
@@ -145,20 +157,10 @@ void Program::ParseArguments(int argc, char **argv)
         }    
     }
 
-    if (_orderSpanPeak == 0)
-    {
-        _orderSpanPeak = _orderSpan >> 1;
-    }
-
-    if (_travelMin == 0 || _travelMax == 0)
-    {
-        _travelMin = _travel > 300 ? _travel - 300 : 0;
-        _travelMax = _travel + 300;
-
-        Order::SetTravelTimes(_travelMin, _travelMax);
-    }
-
+    Order::SetTravelTimes(travel, travelMin, travelMax);
+    Order::SetPreparationTime(orderPreparation);
     Order::SetBikesToCars(_bikes, _cars);
+    Generator::SetOrderSpans(orderSpan, orderSpanRushHour);
 }
 
 void Program::HelpMsg()
