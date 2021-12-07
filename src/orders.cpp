@@ -27,7 +27,7 @@ void Order::Behavior()
         Wait(Normal(_orderPreparation, _orderPreparation / 4.0));    // cooking and preparation
         (new QualityControl(_OrderNumber))->Activate();     // starting the quality check
 
-        while (Cars::cars->Full() && Bikes::bikes->Full() && _pickingUpOrders == Unset) 
+        while (Cars::cars->Full() && Bikes::bikes->Full()) 
         {
             // all cars and bikes are currently bussy delivering
             _waitingOrders.InsFirst(this);
@@ -57,6 +57,10 @@ void Order::Behavior()
             _preparedForPickupQueue->front()->StartDelivery(_preparedForPickupQueue); // delivery of the first order in the batch starts
             _preparedForPickupQueue->pop();
         }
+        else
+        {
+            NextOrder(); // driver can take more orders
+        }
         Passivate();
     }
     else    // no driver is picking up orders
@@ -69,6 +73,7 @@ void Order::Behavior()
             _preparedForPickupQueue->push(this);
             _pickingUpOrders = CarDriver;   // current driver, who is picking deliveries
             _MyDriver = CarDriver;          // driver of the given order
+            NextOrder();                    // driver can take more orders
             Passivate();
         }
         else
@@ -77,6 +82,7 @@ void Order::Behavior()
             _preparedForPickupQueue->push(this);
             _pickingUpOrders = BikeRider;   // current driver, who is picking deliveries
             _MyDriver = BikeRider;          // driver of the given order
+            NextOrder();                    // driver can take more orders
             Passivate();
         }
     }
@@ -99,11 +105,7 @@ void Order::Behavior()
         }
 
         delete _DeliveryQueue;
-
-        if (!_waitingOrders.Empty())
-        {
-            _waitingOrders.GetFirst()->Activate();  // new orders can be handed to the arriving vehicle
-        }
+        NextOrder();    // driver arrived back to kitchen and can take next order
     }
     else
     {
@@ -186,6 +188,14 @@ void Order::Stats(unsigned cuttoff)
     _waitingOrders.Output();
     PrintAverage();
     PrintDelayed(cuttoff);
+}
+
+void Order::NextOrder()
+{
+    if (!_waitingOrders.Empty())
+    {
+        _waitingOrders.GetFirst()->Activate();  // new order can be handed to the currently filled vehicle
+    }
 }
 
 void Order::DeliveryDelay()

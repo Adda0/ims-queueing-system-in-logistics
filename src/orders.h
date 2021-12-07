@@ -40,6 +40,7 @@ private:
     static double _bikesToCars;
     static void PrintAverage();
     static void PrintDelayed(unsigned cutoff);
+    static void NextOrder();
 
     double _Start = 0;
     queue<Order *> *_DeliveryQueue = nullptr;
