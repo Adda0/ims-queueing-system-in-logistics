@@ -1,6 +1,6 @@
 #include "program.h"
 
-unsigned Program::_cars(3);
+unsigned Program::_cars(4);
 unsigned Program::_bikes(6);
 unsigned Program::_deliveryTime(60);
 
@@ -35,8 +35,8 @@ void Program::ParseArguments(int argc, char **argv)
 {
     unsigned orderSpan{5};
     unsigned orderSpanRushHour{0};
-    unsigned orderPreparation{5};
-    unsigned travel{10};
+    unsigned orderPreparation{10};
+    unsigned travel{12};
     unsigned travelMin{0};
     unsigned travelMax{0};
 
