@@ -17,13 +17,14 @@ enum DriverType
 };
 
 #define CAR_DRIVER_ORDER_COUNT 4
-#define CASH_PAYMENT_PROBABILITY 0.2
+#define CASH_PAYMENT_PROBABILITY 0.1
 #define CASH_PAYMENT_DELAY 2
-#define CARD_PAYMENT_PROBABILITY 0.3
+#define CARD_PAYMENT_PROBABILITY 0.2
 #define CARD_PAYMENT_DELAY 1
 #define PAIED_IN_ADVANCED_PROBABILITY (1.0 - CASH_PAYMENT_PROBABILITY - CARD_PAYMENT_PROBABILITY)
 #define QUALITY_DELAY_TIME 20
 #define TRAFIC_JAM_PROBABILITY 0.5
+#define EXPIRED_DELIVERY_PAID_PROBABILITY 0.5
 
 class Order : public Process
 {
@@ -32,14 +33,12 @@ private:
     static queue<Order *> *_preparedForPickupQueue;
     static vector<unsigned> _ordersDeliverySpans;
     static DriverType _pickingUpOrders;
-    static unsigned _travelMin;
-    static unsigned _travelMax;
-    static unsigned _orderPreparation;
     static unsigned _orderNumberCounter;
     static unsigned _orderQualityCheckDone;
-    static double _bikesToCars;
+    static double _totalExpenses;
+    static double _totalIncomes;
     static void PrintAverage();
-    static void PrintDelayed(unsigned cutoff);
+    static void PrintDelayed();
     static void NextOrder();
 
     double _Start = 0;
@@ -51,12 +50,15 @@ private:
     void Behavior();
 
 public:
-    static void SetPreparationTime(unsigned orderPreparation);
-    static void SetTravelTimes(unsigned travel, unsigned travelMin, unsigned travelMax);
-    static void SetBikesToCars(unsigned bikes, unsigned cars);
-    static void Stats(unsigned cuttoff);
+    static void Stats();
     static void CheckQuality(unsigned orderNumber);
 
+    static unsigned maximumDeliveryTime;
+    static unsigned travelTime;
+    static unsigned orderPreparation;
+    static double averageExpense;
+    static double bikesToCars;
+    static double averageIncome;
     const unsigned * const OrderNumber = &_OrderNumber;
     void StartImmidiateDelivery();
     void StartDelivery(queue<Order *> *queue);

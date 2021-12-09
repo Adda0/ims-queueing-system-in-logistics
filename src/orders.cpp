@@ -4,12 +4,17 @@ Queue Order::_waitingOrders("Orders");
 queue<Order *> *Order::_preparedForPickupQueue(nullptr);
 vector<unsigned> Order::_ordersDeliverySpans;
 DriverType Order::_pickingUpOrders(Unset);
-unsigned Order::_travelMin(0);
-unsigned Order::_travelMax(0);
-unsigned Order::_orderPreparation(10);
+double Order::_totalExpenses(0);
 unsigned Order::_orderNumberCounter(0);
 unsigned Order::_orderQualityCheckDone(0);
-double Order::_bikesToCars(0.5);
+double Order::_totalIncomes(0);
+
+unsigned Order::travelTime(12);
+unsigned Order::orderPreparation(10);
+unsigned Order::maximumDeliveryTime(60);
+double Order::bikesToCars(0.5);
+double Order::averageExpense(100);
+double Order::averageIncome(250);
 
 void Order::StartDelivery(queue<Order *> *queue)
 {
@@ -23,22 +28,23 @@ void Order::Behavior()
 
     do
     {
-        _OrderNumber = ++_orderNumberCounter;  // order is assigned with serial number 
-        Wait(Normal(_orderPreparation, _orderPreparation / 4.0));    // cooking and preparation
-        (new QualityControl(_OrderNumber))->Activate();     // starting the quality check
+        _totalExpenses += averageExpense;
+        _OrderNumber = ++_orderNumberCounter;                        // order is assigned with serial number 
+        Wait(Normal(orderPreparation, orderPreparation / 4.0));    // cooking and preparation
+        (new QualityControl(_OrderNumber))->Activate();              // starting the quality check
 
-        while (Cars::cars->Full() && Bikes::bikes->Full()) 
+        if (Cars::cars->Full() && Bikes::bikes->Full()) 
         {
             // all cars and bikes are currently bussy delivering
             _waitingOrders.InsFirst(this);
             Passivate();
         }
 
-        Priority++;     // preemtively increasing the priority of the order, if it fails quality check
+        Priority++;                                 // preemtively increasing the priority of the order, if it fails quality check
     }
     while (_OrderNumber <= _orderQualityCheckDone); // order was not picked up by driver at all yet, quality check failed, must be remade
 
-    if (_pickingUpOrders == BikeRider)  // bike rider is picking 2 orders at once
+    if (_pickingUpOrders == BikeRider)              // bike rider is picking 2 orders at once
     {
         _MyDriver = BikeRider;
         _pickingUpOrders = Unset;
@@ -67,29 +73,41 @@ void Order::Behavior()
     {
         _preparedForPickupQueue = new queue<Order *>;
         // next orders are going to be handled by a type of a driver proportionaly to the available cars and bikes
-        if ((!Cars::cars->Full() && !Bikes::bikes->Full() && Random() > _bikesToCars) || (!Cars::cars->Full() && Bikes::bikes->Full()))
+        if ((!Cars::cars->Full() && !Bikes::bikes->Full() && Random() > bikesToCars) || (!Cars::cars->Full() && Bikes::bikes->Full()))
         {
-            Cars::Take(*this);  // takes the current car
+            Cars::Take(*this);              // takes the current car
             _preparedForPickupQueue->push(this);
             _pickingUpOrders = CarDriver;   // current driver, who is picking deliveries
             _MyDriver = CarDriver;          // driver of the given order
-            NextOrder();                    // driver can take more orders
-            Passivate();
         }
         else
         {
-            Bikes::Take(*this);     // takes the current bike
+            Bikes::Take(*this);             // takes the current bike
             _preparedForPickupQueue->push(this);
             _pickingUpOrders = BikeRider;   // current driver, who is picking deliveries
             _MyDriver = BikeRider;          // driver of the given order
-            NextOrder();                    // driver can take more orders
-            Passivate();
         }
+        
+        Wait(Uniform(5, 10));               // TODO
+        NextOrder();                        // driver can take more orders
+        Passivate();
     }
 
     DeliveryDelay(); // driver drives to the customer
     PaymentDelay();  // driver hands the order to customer and recieves payment
-    _ordersDeliverySpans.push_back(static_cast<unsigned>(Time - _Start));   // order delivered
+    unsigned travelTime{static_cast<unsigned>(Time - _Start)};
+    _ordersDeliverySpans.push_back(travelTime);   // order delivered
+    if (travelTime > maximumDeliveryTime)
+    {
+        if (Random() < EXPIRED_DELIVERY_PAID_PROBABILITY)
+        {
+            _totalIncomes += averageIncome / 2.0;  // order deliverted in time, but the customer accepts the order and pays half the price
+        }
+    }
+    else
+    {
+        _totalIncomes += averageIncome;     // order deliver in time, therfore paid 
+    }
 
     if (_DeliveryQueue->empty()) // no more orders to deliver in a batch
     {
@@ -125,12 +143,12 @@ void Order::PrintAverage()
     cout << "Average order delivery time was " << average << " minutes." << endl;
 }
 
-void Order::PrintDelayed(unsigned cutoff)
+void Order::PrintDelayed()
 {
     unsigned delayed = 0;
     for (auto order : _ordersDeliverySpans)
     {
-        if (order > cutoff)
+        if (order > maximumDeliveryTime)
         {
             delayed += 1;
         }
@@ -150,44 +168,11 @@ void Order::PrintDelayed(unsigned cutoff)
     }
 }
 
-void Order::SetPreparationTime(unsigned orderPreparation)
-{
-    _orderPreparation = orderPreparation;
-}
-
-void Order::SetTravelTimes(unsigned travel, unsigned travelMin, unsigned travelMax)
-{
-    _travelMin = travelMin;
-    _travelMax = travelMax;
-
-    if (travelMin == 0) // travel min not set by the user, calculated from average travel time
-    {
-        _travelMin = travel - (travel >> 1);
-    }
-
-    if (travelMax == 0) // travel max not set by the user, calculated from average travel time
-    {
-        _travelMax = travel + (travel >> 1);
-    }
-}
-
-void Order::SetBikesToCars(unsigned bikes, unsigned cars)
-{
-    if (bikes || cars)
-    {
-        _bikesToCars = static_cast<double>(bikes) / (bikes + cars);
-    }
-    else
-    {
-        throw exception();
-    }
-}
-
-void Order::Stats(unsigned cuttoff)
+void Order::Stats()
 {
     _waitingOrders.Output();
     PrintAverage();
-    PrintDelayed(cuttoff);
+    PrintDelayed();
 }
 
 void Order::NextOrder()
@@ -200,16 +185,20 @@ void Order::NextOrder()
 
 void Order::DeliveryDelay()
 {
+    // TODO driver mistake
+
     if (_MyDriver == CarDriver && Generator::IsIncreasedTrafic(Time) && Random() < TRAFIC_JAM_PROBABILITY)
     {
         // Orders is delivered in a car and hits traffic jam, the delivery time is doubled.
-        Wait(Uniform(_travelMin << 1, _travelMax << 1));
+        Wait(Normal(travelTime, travelTime / 4.0));
     }
     else
     {
         // normal delivery time
-        Wait(Uniform(_travelMin, _travelMax));
+        Wait(Normal(travelTime, travelTime / 4.0));
     }
+
+    // TODO handout
 }
 
 void Order::PaymentDelay()

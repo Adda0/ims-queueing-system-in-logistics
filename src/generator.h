@@ -6,22 +6,23 @@
 #include "orders.h"
 
 
-#define OPENING_HOURS            720           // 720 min (12 hours)
-#define ADDITIONAL_DELIVERY_TIME 60            // 60 min (1 hour)
-#define RUSH_HOUR_START          120           // 120 min (2 hours) after opening
-#define RUSH_HOUR_END            270           // 270 min (4.5 hours) after opening, i.e. the rush hour lasts for 2.5 hours
-#define INCREASED_TRAFIC_START   330           // 330 min (5.5 hours) after opening
-#define INCREASED_TRAFIC_END     480           // 480 min (8 hours) after opening, i.e increased trafic lasts for 2.5 hours
+#define OPENING_HOURS            720           // 720 min (12 hours), 10:00 - 22:00
+#define ADDITIONAL_DELIVERY_TIME 120           // 120 min (2 hours), additional simulation time allowing delivery of last orders.
+#define RUSH_HOUR_START          120           // 120 min (2 hours) after opening, 12:00
+#define RUSH_HOUR_END            270           // 270 min (4.5 hours) after opening, i.e. the rush hour lasts for 2.5 hours, to 14:30 
+#define INCREASED_TRAFIC_START   330           // 330 min (5.5 hours) after opening, 15:30
+#define INCREASED_TRAFIC_END     480           // 480 min (8 hours) after opening, i.e increased trafic lasts for 2.5 hours, to 18:00
 
 class Generator : public Event
 {
 private:
-    static unsigned _orderSpan;
-    static unsigned _orderSpanRushHour;
 
     void Behavior();
 
 public:
+    static unsigned orderSpan;
+    static unsigned orderSpanRushHour;
+
     static bool IsIncreasedTrafic(unsigned time);
     static void SetOrderSpans(unsigned orderSpan, unsigned orderSpanRushHour);
 };
