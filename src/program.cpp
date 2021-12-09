@@ -1,7 +1,7 @@
 #include "program.h"
 
-unsigned Program::_cars(0);
-unsigned Program::_bikes(10);
+unsigned Program::_cars(NUMBER_OF_CARS_DEFAULT);
+unsigned Program::_bikes(NUMBER_OF_BIKES_DEFAULT);
 
 void Program::Run(int argc, char **argv)
 {
@@ -45,6 +45,7 @@ void Program::ParseArguments(int argc, char **argv)
         {"preparation",   0, nullptr, 'p'},
         {"delivery",      0, nullptr, 'd'},
         {"travel",        0, nullptr, 't'},
+        {"quality",       0, nullptr, 'q'},
         {nullptr,         0, nullptr,  0 }
     };
 
@@ -52,7 +53,7 @@ void Program::ParseArguments(int argc, char **argv)
     unsigned long converter{0};
 
     opterr = 0;
-    while ((c = getopt_long(argc, argv, "?he:i:c:b:o:r:p:d:t:", longOptions, nullptr)) != -1)
+    while ((c = getopt_long(argc, argv, "?he:i:c:b:o:r:p:d:t:q:", longOptions, nullptr)) != -1)
     {
         switch (c)
         {
@@ -114,7 +115,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                Order::orderPreparation = converter;
+                Order::preparationTime = converter;
                 break;
 
             case 'd':
@@ -133,6 +134,15 @@ void Program::ParseArguments(int argc, char **argv)
                     throw exception();
                 }
                 Order::travelTime = converter;
+                break;
+
+            case 'q':
+                converter = stoul(optarg);
+                if (converter > UINT32_MAX)
+                {
+                    throw exception();
+                }
+                QualityControl::qualityDelay = converter;
                 break;
 
             case 'h':

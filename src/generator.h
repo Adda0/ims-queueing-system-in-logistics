@@ -13,6 +13,9 @@
 #define INCREASED_TRAFIC_START   330           // 330 min (5.5 hours) after opening, 15:30
 #define INCREASED_TRAFIC_END     480           // 480 min (8 hours) after opening, i.e increased trafic lasts for 2.5 hours, to 18:00
 
+#define ORDER_SPAN_DEFAULT 10
+#define ORDER_SPAN_RUSH_DEFAULT 5
+
 class Generator : public Event
 {
 private:

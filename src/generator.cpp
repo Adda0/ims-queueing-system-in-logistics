@@ -1,8 +1,8 @@
 #include "generator.h"
 #include "orders.h"
 
-unsigned Generator::orderSpan(10);
-unsigned Generator::orderSpanRushHour(Generator::orderSpan >> 1);
+unsigned Generator::orderSpan(ORDER_SPAN_DEFAULT);
+unsigned Generator::orderSpanRushHour(ORDER_SPAN_RUSH_DEFAULT);
 
 void Generator::Behavior()
 {
