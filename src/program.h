@@ -12,6 +12,9 @@
 
 using namespace std;
 
+#define NUMBER_OF_CARS_DEFAULT 3
+#define NUMBER_OF_BIKES_DEFAULT 3
+
 class Program
 {
 private:
