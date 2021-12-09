@@ -17,7 +17,6 @@ class Program
 private:
     static unsigned _cars;
     static unsigned _bikes;
-    static unsigned _deliveryTime;
     
     static void ParseArguments(int argc, char **argv);
     static void HelpMsg();

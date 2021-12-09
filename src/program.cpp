@@ -1,8 +1,7 @@
 #include "program.h"
 
-unsigned Program::_cars(4);
-unsigned Program::_bikes(6);
-unsigned Program::_deliveryTime(60);
+unsigned Program::_cars(0);
+unsigned Program::_bikes(10);
 
 void Program::Run(int argc, char **argv)
 {
@@ -28,31 +27,24 @@ void Program::Run(int argc, char **argv)
 
     Cars::Stats();
     Bikes::Stats();
-    Order::Stats(_deliveryTime);
+    Order::Stats();
 }
 
 void Program::ParseArguments(int argc, char **argv)
 {
-    unsigned orderSpan{5};
-    unsigned orderSpanRushHour{0};
-    unsigned orderPreparation{10};
-    unsigned travel{12};
-    unsigned travelMin{0};
-    unsigned travelMax{0};
-
     // accepted long options
     static struct option longOptions[] =
     {
-        {"bikes",         0, nullptr, 'b'},
+        {"help",          0, nullptr, 'h'},
+        {"expenses",      0, nullptr, 'e'},
+        {"incomes",       0, nullptr, 'i'},
         {"cars",          0, nullptr, 'c'},
+        {"bikes",         0, nullptr, 'b'},
         {"order",         0, nullptr, 'o'},
         {"rush",          0, nullptr, 'r'},
         {"preparation",   0, nullptr, 'p'},
-        {"help",          0, nullptr, 'h'},
         {"delivery",      0, nullptr, 'd'},
         {"travel",        0, nullptr, 't'},
-        {"travel-min",    0, nullptr, 'n'},
-        {"travel-max",    0, nullptr, 'x'},
         {nullptr,         0, nullptr,  0 }
     };
 
@@ -60,10 +52,26 @@ void Program::ParseArguments(int argc, char **argv)
     unsigned long converter{0};
 
     opterr = 0;
-    while ((c = getopt_long(argc, argv, "?hb:c:o:d:p:t:n:x:", longOptions, nullptr)) != -1)
+    while ((c = getopt_long(argc, argv, "?he:i:c:b:o:r:p:d:t:", longOptions, nullptr)) != -1)
     {
         switch (c)
         {
+            case 'e':
+                Order::averageExpense = stod(optarg);
+                if (Order::averageExpense <= 0.0)
+                {
+                    throw exception();
+                }
+                break;
+            
+            case 'i':
+                Order::averageIncome = stod(optarg);
+                if (Order::averageIncome <= 0.0)
+                {
+                    throw exception();
+                }
+                break;
+
             case 'b':
                 converter = stoul(optarg);
                 if (converter > UINT32_MAX)
@@ -88,25 +96,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                orderSpan = converter;
-                break;
-            
-            case 'd':
-                converter = stoul(optarg);
-                if (converter > UINT32_MAX)
-                {
-                    throw exception();
-                }
-                _deliveryTime = converter;
-                break;
-
-            case 'p':
-                converter = stoul(optarg);
-                if (converter > UINT32_MAX)
-                {
-                    throw exception();
-                }
-                orderPreparation = converter;
+                Generator::orderSpan = converter;
                 break;
             
             case 'r':
@@ -115,7 +105,25 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                orderSpanRushHour = converter;
+                Generator::orderSpanRushHour = converter;
+                break;
+
+            case 'p':
+                converter = stoul(optarg);
+                if (converter > UINT32_MAX)
+                {
+                    throw exception();
+                }
+                Order::orderPreparation = converter;
+                break;
+
+            case 'd':
+                converter = stoul(optarg);
+                if (converter > UINT32_MAX)
+                {
+                    throw exception();
+                }
+                Order::maximumDeliveryTime = converter;
                 break;
             
             case 't':
@@ -124,25 +132,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                travel = converter;
-                break;
-            
-            case 'n':
-                converter = stoul(optarg);
-                if (converter > UINT32_MAX)
-                {
-                    throw exception();
-                }
-                travelMin = converter;
-                break;
-            
-            case 'x':
-                converter = stoul(optarg);
-                if (converter > UINT32_MAX)
-                {
-                    throw exception();
-                }
-                travelMax = converter;
+                Order::travelTime = converter;
                 break;
 
             case 'h':
@@ -157,10 +147,12 @@ void Program::ParseArguments(int argc, char **argv)
         }    
     }
 
-    Order::SetTravelTimes(travel, travelMin, travelMax);
-    Order::SetPreparationTime(orderPreparation);
-    Order::SetBikesToCars(_bikes, _cars);
-    Generator::SetOrderSpans(orderSpan, orderSpanRushHour);
+    if (_cars == 0 && _bikes == 0)
+    {
+        throw exception();
+    }
+
+    Order::bikesToCars = static_cast<double>(_bikes) / (_bikes + _cars);
 }
 
 void Program::HelpMsg()
