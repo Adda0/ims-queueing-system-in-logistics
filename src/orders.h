@@ -24,12 +24,12 @@ enum DriverType
 #define CARD_PAYMENT_DELAY 1
 #define PAIED_IN_ADVANCED_PROBABILITY (1.0 - CASH_PAYMENT_PROBABILITY - CARD_PAYMENT_PROBABILITY)
 #define TRAFIC_JAM_PROBABILITY 0.5
-#define EXPIRED_DELIVERY_PAID_PROBABILITY 0.5
 #define DELIVERY_DELAY_MIN 1
 #define DELIVERY_DELAY_MAX 5
 #define PACKING_DELAY_MIN 1
 #define PACKING_DELAY_MAX 4
 #define DRIVER_MISTAKE_PROBABILITY 0.01
+#define COOK_MISTAKE_PROBABILITY 0.01
 #define DRIVER_MISTAKE_TIME 10
 
 #define QUALITY_DELAY_TIME_DEFAULT 20
@@ -38,6 +38,7 @@ enum DriverType
 #define MAXIMUM_DELIVERY_TIME_DEFAULT 60
 #define AVERAGE_EXPENSES_DEFAULT 100
 #define AVERAGE_INCOMES_DEFAULT 250
+#define UNPAID_ORDER_PROBABILITY_DEFAULT 0.5
 
 class Order : public Process
 {
@@ -54,10 +55,13 @@ private:
     static double _totalExpenses;
     static double _totalIncomes;
     static unsigned _orderQualityCheckDone;
+    static unsigned _cookMistakes;
+    static unsigned _driverMistakes;
     static void PrintAverage();
     static void PrintDelayed();
     static void PrintRemade();
     static void PrintEconomics();
+    static void PrintMistakes();
     static void NextOrder();
 
     double _Start = 0;
@@ -80,6 +84,7 @@ public:
     static double averageExpense;
     static double bikesToCars;
     static double averageIncome;
+    static double unpaidProbability;
     const unsigned * const OrderNumber = &_OrderNumber;
     void StartImmidiateDelivery();
     void StartDelivery(queue<Order *> *queue);

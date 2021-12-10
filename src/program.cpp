@@ -46,6 +46,7 @@ void Program::ParseArguments(int argc, char **argv)
         {"delivery",      0, nullptr, 'd'},
         {"travel",        0, nullptr, 't'},
         {"quality",       0, nullptr, 'q'},
+        {"unpaid",        0, nullptr, 'u'},
         {nullptr,         0, nullptr,  0 }
     };
 
@@ -53,7 +54,7 @@ void Program::ParseArguments(int argc, char **argv)
     unsigned long converter{0};
 
     opterr = 0;
-    while ((c = getopt_long(argc, argv, "?he:i:c:b:o:r:p:d:t:q:", longOptions, nullptr)) != -1)
+    while ((c = getopt_long(argc, argv, "?he:i:c:b:o:r:p:d:t:q:u:", longOptions, nullptr)) != -1)
     {
         switch (c)
         {
@@ -143,6 +144,14 @@ void Program::ParseArguments(int argc, char **argv)
                     throw exception();
                 }
                 QualityControl::qualityDelay = converter;
+                break;
+
+            case 'u':
+                Order::unpaidProbability = stod(optarg);
+                if (Order::unpaidProbability < 0.0 || Order::unpaidProbability > 1.0)
+                {
+                    throw exception();
+                }
                 break;
 
             case 'h':
