@@ -13,12 +13,15 @@ unsigned Order::_orderNumberCounter(0);
 unsigned Order::_orderQualityCheckDone(0);
 double Order::_totalIncomes(0);
 double Order::bikesToCars(0);
+unsigned Order::_cookMistakes(0);
+unsigned Order::_driverMistakes(0);
 
 unsigned Order::travelTime(TRAVEL_TIME_DEFAULT);
 unsigned Order::preparationTime(PREPARATION_TIME_DEFAULT);
 unsigned Order::maximumDeliveryTime(MAXIMUM_DELIVERY_TIME_DEFAULT);
 double Order::averageExpense(AVERAGE_EXPENSES_DEFAULT);
 double Order::averageIncome(AVERAGE_INCOMES_DEFAULT);
+double Order::unpaidProbability(UNPAID_ORDER_PROBABILITY_DEFAULT);
 
 unsigned QualityControl::qualityDelay(QUALITY_DELAY_TIME_DEFAULT);
 
@@ -35,9 +38,19 @@ void Order::Behavior()
 
     do
     {
-        _totalExpenses += averageExpense;
         _OrderNumber = ++_orderNumberCounter;                        // order is assigned with serial number 
+        
+        _totalExpenses += averageExpense;
         Wait(Normal(preparationTime, preparationTime / 4.0));        // cooking and preparation
+
+        if (Random() < COOK_MISTAKE_PROBABILITY) // Cook makes a mistake and the meal must be prepared again
+        {
+            _cookMistakes++;
+            _totalExpenses += averageExpense;
+            Wait(Normal(preparationTime, preparationTime / 4.0));
+        }
+
+        
         (new QualityControl(_OrderNumber))->Activate();              // starting the quality check
 
         if (Cars::cars->Full() && Bikes::bikes->Full()) 
@@ -133,17 +146,10 @@ void Order::Behavior()
     _deliverySpans.push_back(travelTime);   // order delivered
     _deliveryTimeHistogram(travelTime);
 
-    if (travelTime > maximumDeliveryTime)
+    if (travelTime <= maximumDeliveryTime || Random() > unpaidProbability)
     {
-        if (Random() < EXPIRED_DELIVERY_PAID_PROBABILITY)
-        {
-            // order not deliverted in time, but the customer accepts the order and pays half the price
-            _totalIncomes += averageIncome / 2.0;  
-        }
-    }
-    else
-    {
-        _totalIncomes += averageIncome;     // order deliver in time, therfore paid 
+        // order delivered in time, therfore paid, or the customer pays delayd order, with certain probability
+        _totalIncomes += averageIncome;     
     }
 
     if (_DeliveryQueue->empty()) // no more orders to deliver in a batch
@@ -229,12 +235,42 @@ void Order::PrintEconomics()
     cout << "Profit:   " << _totalIncomes - _totalExpenses << endl;
 }
 
+void Order::PrintMistakes()
+{
+    if (_driverMistakes == 0)
+    {
+        cout << "Drivers did not do any mistakes." << endl;
+    }
+    else if (_driverMistakes == 1)
+    {
+        cout << "Drivers made 1 mistake." << endl;
+    }
+    else
+    {
+        cout << "Drivers made " << _driverMistakes << " mistakes." << endl;
+    }
+
+    if (_cookMistakes == 0)
+    {
+        cout << "Cooks did not do any mistakes." << endl;
+    }
+    else if (_cookMistakes == 1)
+    {
+        cout << "Cooks made 1 mistake." << endl;
+    }
+    else
+    {
+        cout << "Cooks made " << _driverMistakes << " mistakes." << endl;
+    }
+}
+
 void Order::Stats()
 {
     _waitingOrdersQueue.Output();
     _driverPackingQueue.Output();
     _deliveryTimeHistogram.Output();
     _driverLoadHistogram.Output();
+    PrintMistakes();
     PrintAverage();
     PrintDelayed();
     PrintRemade();
@@ -262,6 +298,7 @@ void Order::DeliveryDelay()
 {
     if (Random() < DRIVER_MISTAKE_PROBABILITY)
     {
+        _driverMistakes++;
         Wait(Exponential(DRIVER_MISTAKE_TIME));  // ridic udelal chybu pri dovazce
     }
 
