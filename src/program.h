@@ -1,3 +1,10 @@
+//===============================================================================================================
+// File:        program.h
+// Project:     VUT, FIT, IMS, Queueing system in logistics
+// Date:        11. 12. 2021
+// Authors:     David Chocholatý (xchoch08@stud.fit.vutbr.cz), David Mihola (xmihol00@stud.fit.vutbr.cz)
+//===============================================================================================================
+
 #pragma once
 
 #include <getopt.h>
@@ -22,7 +29,7 @@ private:
     static unsigned _bikes;
     
     static void ParseArguments(int argc, char **argv);
-    static void HelpMsg();
+    static void HelpMessage();
 
 public:
     static void Run(int argc, char **argv);

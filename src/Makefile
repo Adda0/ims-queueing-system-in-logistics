@@ -1,7 +1,14 @@
+#===============================================================================================================
+# File:        Makefile
+# Project:     VUT, FIT, IMS, Queueing system in logistics
+# Date:        11. 12. 2021
+# Authors:     David Chocholatý (xchoch08@stud.fit.vutbr.cz), David Mihola (xmihol00@stud.fit.vutbr.cz)
+#===============================================================================================================
+
 CC = g++
 CFLAGS = -std=c++17 -Wall -Wextra -g -MMD
 BUILD_DIR = ../build/
-EXE = ../sim
+EXE = ../model
 SRC = $(wildcard *.cpp)
 OBJ = ${SRC:.cpp=.o}
 DEPS = ${OBJ:.o=.d}

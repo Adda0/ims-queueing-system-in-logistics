@@ -1,3 +1,10 @@
+//===============================================================================================================
+// File:        generator.h
+// Project:     VUT, FIT, IMS, Queueing system in logistics
+// Date:        11. 12. 2021
+// Authors:     David Chocholatý (xchoch08@stud.fit.vutbr.cz), David Mihola (xmihol00@stud.fit.vutbr.cz)
+//===============================================================================================================
+
 #pragma once
 
 #include <simlib.h>
@@ -24,8 +31,7 @@ private:
 
 public:
     static unsigned orderSpan;
-    static unsigned orderSpanRushHour;
+    static unsigned orderSpanRush;
 
     static bool IsIncreasedTrafic(unsigned time);
-    static void SetOrderSpans(unsigned orderSpan, unsigned orderSpanRushHour);
 };
