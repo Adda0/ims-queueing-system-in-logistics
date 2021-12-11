@@ -28,13 +28,22 @@ void Program::Run(int argc, char **argv)
     Cars::Init(_cars);
     Bikes::Init(_bikes);
 
+    DriverLoad driverLoad;
+    driverLoad.Activate();
     Generator generator;
     generator.Activate();
     simlib3::Run();
 
-    Cars::Stats();
-    Bikes::Stats();
-    Order::Stats();
+    if (DriverLoad::printCSV)
+    {
+        driverLoad.PrintCSV();
+    }
+    else
+    {
+        Cars::Stats();
+        Bikes::Stats();
+        Order::Stats();
+    }
 }
 
 void Program::ParseArguments(int argc, char **argv)
@@ -54,6 +63,7 @@ void Program::ParseArguments(int argc, char **argv)
         {"travel",        1, nullptr, 't'},
         {"quality",       1, nullptr, 'q'},
         {"unpaid",        1, nullptr, 'u'},
+        {"file",          0, nullptr, 'f'},
         {nullptr,         0, nullptr,  0 }
     };
 
@@ -61,7 +71,7 @@ void Program::ParseArguments(int argc, char **argv)
     unsigned long converter{0};
 
     opterr = 0;
-    while ((c = getopt_long(argc, argv, "he:i:c:b:o:r:p:d:t:q:u:", longOptions, nullptr)) != -1)
+    while ((c = getopt_long(argc, argv, "he:i:c:b:o:r:p:d:t:q:u:f", longOptions, nullptr)) != -1)
     {
         switch (c)
         {
@@ -160,6 +170,10 @@ void Program::ParseArguments(int argc, char **argv)
                     throw exception();
                 }
                 break;
+            
+            case 'f':
+                DriverLoad::printCSV = true;
+                break;
 
             case 'h':
                 HelpMessage();
@@ -185,16 +199,17 @@ void Program::HelpMessage()
 {
     cout << "Usage: model [OPTIONS]" << endl;
     cout << "Options:" << endl;
-    cout << "  -h or --help             prints this help message." << endl;
-    cout << "  -e or --expense NUM      sets the average expense for one order, default value is " << Order::averageExpense << "." << endl;
-    cout << "  -i or --income NUM       sets the average income for one order, default value is " << Order::averageIncome << "." << endl;
-    cout << "  -c or --cars NUM         sets the number of used cars, default value is " << Program::_cars << "." << endl;
-    cout << "  -b or --bikes NUM        sets the number of used motorbikes, default value is " << Program::_bikes << "." << endl;
-    cout << "  -o or --order NUM        sets the average time span in minutes between orders, default value is " << Generator::orderSpan << "." << endl;
-    cout << "  -r or --rush NUM         sets the average time span in minutes between orders during the lunch time, default value is " << Generator::orderSpanRush << "." << endl;
-    cout << "  -p or --preparation NUM  sets the average time in minutes needed for meal preparation, default value is " << Order::preparationTime << "." << endl;
-    cout << "  -d or --delivery NUM     sets the maximum time in minutes, in wich an order has to be delivered, default value is " << Order::maximumDeliveryTime << "." << endl;
-    cout << "  -t or --travel NUM       sets the average time in minutes, which a driver spends traveling between orders or restaurant, default value is " << Order::travelTime << "." << endl;
-    cout << "  -q or --quality NUM      sets the time in minutes, after which an order delivery must start, default value is " << QualityControl::qualityDelay << ". In case no drivers are available order must be prepared again." << endl;
-    cout << "  -u or --unpaid NUM       sets the probability in percentages of delayed order not being paid, default value is " << Order::unpaidProbability << "." << endl;
+    cout << "  -e or --expense NUM      Sets the average expense for one order, default value is " << Order::averageExpense << "." << endl;
+    cout << "  -i or --income NUM       Sets the average income for one order, default value is " << Order::averageIncome << "." << endl;
+    cout << "  -c or --cars NUM         Sets the number of used cars, default value is " << Program::_cars << "." << endl;
+    cout << "  -b or --bikes NUM        Sets the number of used motorbikes, default value is " << Program::_bikes << "." << endl;
+    cout << "  -o or --order NUM        Sets the average time span in minutes between orders, default value is " << Generator::orderSpan << "." << endl;
+    cout << "  -r or --rush NUM         Sets the average time span in minutes between orders during the lunch time, default value is " << Generator::orderSpanRush << "." << endl;
+    cout << "  -p or --preparation NUM  Sets the average time in minutes needed for meal preparation, default value is " << Order::preparationTime << "." << endl;
+    cout << "  -d or --delivery NUM     Sets the maximum time in minutes, in wich an order has to be delivered, default value is " << Order::maximumDeliveryTime << "." << endl;
+    cout << "  -t or --travel NUM       Sets the average time in minutes, which a driver spends traveling between orders or restaurant, default value is " << Order::travelTime << "." << endl;
+    cout << "  -q or --quality NUM      Sets the time in minutes, after which an order delivery must start, default value is " << QualityControl::qualityDelay << ". In case no drivers are available order must be prepared again." << endl;
+    cout << "  -u or --unpaid NUM       Sets the probability in percentages of delayed order not being paid, default value is " << Order::unpaidProbability << "." << endl;
+    cout << "  -f or --file             Prints the load of drivers during each minute in CSV format instead of the regular output." << endl;
+    cout << "  -h or --help             Prints this help message." << endl;
 }

@@ -9,6 +9,8 @@
 
 #include <simlib.h>
 #include <string>
+#include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -66,3 +68,22 @@ template <typename T> void Drivers<T>::Stats()
     _store.SetName(name);
     _store.Output();
 }
+
+class DriverLoad : public Event
+{
+private:
+    struct csvLine
+    {
+        unsigned time;
+        unsigned carLoad;
+        unsigned bikeLoad;
+    };
+    vector<csvLine> _driverLoad;
+    
+public:
+    static bool printCSV;
+
+    void Behavior();
+    void PrintCSV();
+};
+
