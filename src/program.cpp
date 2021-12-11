@@ -38,12 +38,10 @@ void Program::Run(int argc, char **argv)
     {
         driverLoad.PrintCSV();
     }
-    else
-    {
-        Cars::Stats();
-        Bikes::Stats();
-        Order::Stats();
-    }
+
+    Cars::Stats();
+    Bikes::Stats();
+    Order::Stats();
 }
 
 void Program::ParseArguments(int argc, char **argv)

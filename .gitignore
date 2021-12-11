@@ -1,4 +1,4 @@
 build/
-sim
 model
 mono_*
+src/graphs/.idea

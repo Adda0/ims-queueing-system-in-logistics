@@ -54,7 +54,8 @@ private:
     static Queue _waitingOrdersQueue;
     static Queue _driverPackingQueue;
     static Histogram _deliveryTimeHistogram;
-    static Histogram _driversUtilityHistogram;
+    static Histogram _carDeliveryTimeHistogram;
+    static Histogram _bikeDeliveryTimeHistogram;
     static Histogram _driverLoadHistogram;
     static queue<Order *> *_preparedForPickupQueue;
     static vector<unsigned> _deliverySpans;

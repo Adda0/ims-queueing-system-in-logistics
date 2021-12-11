@@ -10,6 +10,8 @@
 Queue Order::_waitingOrdersQueue("Orders waiting for a driver.");
 Queue Order::_driverPackingQueue("Orders waiting to be packed by a driver.");
 Histogram Order::_deliveryTimeHistogram("Order delivery time.", 10, 10, 20);
+Histogram Order::_carDeliveryTimeHistogram("Car order delivery time.", 10, 10, 20);
+Histogram Order::_bikeDeliveryTimeHistogram("Bike order delivery time.", 10, 10, 20);
 Histogram Order::_driverLoadHistogram("Orders delivered by a driver at once.", 1, 1, 4);
 Facility Order::_driverPreparationFacility;
 queue<Order *> *Order::_preparedForPickupQueue(nullptr);
@@ -149,6 +151,11 @@ void Order::Behavior()
     unsigned travelTime{static_cast<unsigned>(Time - _Start)};
     _deliverySpans.push_back(travelTime);   // order delivered
     _deliveryTimeHistogram(travelTime);
+    if (_MyDriver == CarDriver) {
+        _carDeliveryTimeHistogram(travelTime);
+    } else {
+        _bikeDeliveryTimeHistogram(travelTime);
+    }
     HandoutDelay();  // driver waits for the customer to pick up the food
     PaymentDelay();  // driver hands the order to customer and recieves payment
 
@@ -275,6 +282,8 @@ void Order::Stats()
     _waitingOrdersQueue.Output();
     _driverPackingQueue.Output();
     _deliveryTimeHistogram.Output();
+    _carDeliveryTimeHistogram.Output();
+    _bikeDeliveryTimeHistogram.Output();
     _driverLoadHistogram.Output();
     PrintMistakes();
     PrintAverage();
