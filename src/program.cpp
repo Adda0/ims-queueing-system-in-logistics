@@ -124,7 +124,7 @@ void Program::ParseArguments(int argc, char **argv)
                 {
                     throw exception();
                 }
-                Generator::orderSpanRush = converter;
+                Generator::orderSpanRushHour = converter;
                 break;
 
             case 'p':
@@ -204,7 +204,7 @@ void Program::HelpMessage()
     cout << "  -c or --cars NUM         Sets the number of used cars, default value is " << Program::_cars << "." << endl;
     cout << "  -b or --bikes NUM        Sets the number of used motorbikes, default value is " << Program::_bikes << "." << endl;
     cout << "  -o or --order NUM        Sets the average time span in minutes between orders, default value is " << Generator::orderSpan << "." << endl;
-    cout << "  -r or --rush NUM         Sets the average time span in minutes between orders during the lunch time, default value is " << Generator::orderSpanRush << "." << endl;
+    cout << "  -r or --rush NUM         Sets the average time span in minutes between orders during the lunch time, default value is " << Generator::orderSpanRushHour << "." << endl;
     cout << "  -p or --preparation NUM  Sets the average time in minutes needed for meal preparation, default value is " << Order::preparationTime << "." << endl;
     cout << "  -d or --delivery NUM     Sets the maximum time in minutes, in wich an order has to be delivered, default value is " << Order::maximumDeliveryTime << "." << endl;
     cout << "  -t or --travel NUM       Sets the average time in minutes, which a driver spends traveling between orders or restaurant, default value is " << Order::travelTime << "." << endl;

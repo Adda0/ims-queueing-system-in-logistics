@@ -25,26 +25,26 @@ enum DriverType
 };
 
 #define CAR_DRIVER_ORDER_COUNT 4
-#define CASH_PAYMENT_PROBABILITY 0.1
+#define CASH_PAYMENT_PROBABILITY 0.05
 #define CASH_PAYMENT_DELAY 2
-#define CARD_PAYMENT_PROBABILITY 0.2
+#define CARD_PAYMENT_PROBABILITY 0.05
 #define CARD_PAYMENT_DELAY 1
-#define PAIED_IN_ADVANCED_PROBABILITY (1.0 - CASH_PAYMENT_PROBABILITY - CARD_PAYMENT_PROBABILITY)
-#define TRAFIC_JAM_PROBABILITY 0.5
+#define PAID_IN_ADVANCED_PROBABILITY (1.0 - CASH_PAYMENT_PROBABILITY - CARD_PAYMENT_PROBABILITY)
+#define TRAFFIC_JAM_PROBABILITY 40
 #define DELIVERY_DELAY_MIN 1
-#define DELIVERY_DELAY_MAX 5
+#define DELIVERY_DELAY_MAX 4
 #define PACKING_DELAY_MIN 1
-#define PACKING_DELAY_MAX 4
+#define PACKING_DELAY_MAX 5
 #define DRIVER_MISTAKE_PROBABILITY 0.01
 #define COOK_MISTAKE_PROBABILITY 0.01
 #define DRIVER_MISTAKE_TIME 10
 
 #define QUALITY_DELAY_TIME_DEFAULT 20
 #define TRAVEL_TIME_DEFAULT 12
-#define PREPARATION_TIME_DEFAULT 10
+#define PREPARATION_TIME_DEFAULT 7
 #define MAXIMUM_DELIVERY_TIME_DEFAULT 60
-#define AVERAGE_EXPENSES_DEFAULT 100
-#define AVERAGE_INCOMES_DEFAULT 250
+#define AVERAGE_EXPENSES_DEFAULT 46
+#define AVERAGE_INCOMES_DEFAULT 325
 #define UNPAID_ORDER_PROBABILITY_DEFAULT 0.5
 
 class Order : public Process
@@ -54,6 +54,7 @@ private:
     static Queue _waitingOrdersQueue;
     static Queue _driverPackingQueue;
     static Histogram _deliveryTimeHistogram;
+    static Histogram _driversUtilityHistogram;
     static Histogram _driverLoadHistogram;
     static queue<Order *> *_preparedForPickupQueue;
     static vector<unsigned> _deliverySpans;
@@ -93,7 +94,7 @@ public:
     static double averageIncome;
     static double unpaidProbability;
     const unsigned * const OrderNumber = &_OrderNumber;
-    void StartImmidiateDelivery();
+    void StartImmediateDelivery();
     void StartDelivery(queue<Order *> *queue);
 };
 
@@ -101,7 +102,6 @@ public:
 class QualityControl : public Process
 {
 private:
-
     unsigned _OrderNumber;
 
 public:

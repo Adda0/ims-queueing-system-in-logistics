@@ -9,7 +9,7 @@
 
 Queue Order::_waitingOrdersQueue("Orders waiting for a driver.");
 Queue Order::_driverPackingQueue("Orders waiting to be packed by a driver.");
-Histogram Order::_deliveryTimeHistogram("Order delivery time.", 10, 10, 10);
+Histogram Order::_deliveryTimeHistogram("Order delivery time.", 10, 10, 20);
 Histogram Order::_driverLoadHistogram("Orders delivered by a driver at once.", 1, 1, 4);
 Facility Order::_driverPreparationFacility;
 queue<Order *> *Order::_preparedForPickupQueue(nullptr);
@@ -45,20 +45,21 @@ void Order::Behavior()
 
     do
     {
-        _OrderNumber = ++_orderNumberCounter;                        // order is assigned with serial number 
-        
+        _OrderNumber = ++_orderNumberCounter;                        // order is assigned with serial number
+
         _totalExpenses += averageExpense;
-        Wait(Normal(preparationTime, preparationTime / 4.0));        // cooking and preparation
+        Wait(Lim(Normal(preparationTime, preparationTime / 4.0), 0, preparationTime * 2).Value());        // cooking and preparation
+
         if (Priority == 0 && Random() < COOK_MISTAKE_PROBABILITY)    // Cook makes a mistake and the meal must be prepared again
         {
             _cookMistakes++;
             _totalExpenses += averageExpense;
-            Wait(Normal(preparationTime, preparationTime / 4.0));
+            Wait(Lim(Normal(preparationTime, preparationTime / 4.0), 0, preparationTime * 2).Value());
         }
  
         (new QualityControl(_OrderNumber))->Activate();              // starting the quality check
 
-        if (Cars::cars->Full() && Bikes::bikes->Full()) 
+        if (Cars::cars->Full() && Bikes::bikes->Full())
         {
             // all cars and bikes are currently bussy delivering
             _waitingOrdersQueue.InsLast(this);
@@ -73,8 +74,8 @@ void Order::Behavior()
         Priority++;                                 // preemtively increasing the priority of the order, if it fails quality check
     }
     while (_OrderNumber <= _orderQualityCheckDone); // order was not picked up by driver at all yet, quality check failed, must be remade
-    
-    _driverPreparationFacility.Seize(this);         // order is being packet
+
+    _driverPreparationFacility.Seize(this);     // order is being packed
 
     if (_pickingUpOrders == BikeRider)              // bike rider is picking 2 orders at once
     {
@@ -95,7 +96,7 @@ void Order::Behavior()
         _pickingUpOrders = Packing;
         Wait(Uniform(PACKING_DELAY_MIN, PACKING_DELAY_MAX));  // driver packs the food, prepares drinks, ...
         NextPacking();      // driver can pack next order
-        if (_preparedForPickupQueue->size() == CAR_DRIVER_ORDER_COUNT || 
+        if (_preparedForPickupQueue->size() == CAR_DRIVER_ORDER_COUNT ||
             _preparedForPickupQueue->front()->_OrderNumber <= _orderQualityCheckDone) // driver capacity is full or the delivery must start imidiately
         {
             _pickingUpOrders = Unset;
@@ -125,7 +126,7 @@ void Order::Behavior()
             _preparedForPickupQueue->push(this);
             _MyDriver = BikeRider;          // driver of the given order
         }
-        
+
         _pickingUpOrders = Packing;
         Wait(Uniform(PACKING_DELAY_MIN, PACKING_DELAY_MAX));  // driver packs the food, prepares drinks, ...
         NextPacking();      // driver can pack next order
@@ -145,16 +146,16 @@ void Order::Behavior()
     }
 
     DeliveryDelay(); // driver drives to the customer
-    HandoutDelay();  // driver waits for the customer to pick up the food
-    PaymentDelay();  // driver hands the order to customer and recieves payment
     unsigned travelTime{static_cast<unsigned>(Time - _Start)};
     _deliverySpans.push_back(travelTime);   // order delivered
     _deliveryTimeHistogram(travelTime);
+    HandoutDelay();  // driver waits for the customer to pick up the food
+    PaymentDelay();  // driver hands the order to customer and recieves payment
 
     if (travelTime <= maximumDeliveryTime || Random() > unpaidProbability)
     {
         // order delivered in time, therfore paid, or the customer pays delayd order, with certain probability
-        _totalIncomes += averageIncome;     
+        _totalIncomes += averageIncome;
     }
 
     if (_DeliveryQueue->empty()) // no more orders to deliver in a batch
@@ -304,18 +305,18 @@ void Order::DeliveryDelay()
     if (Random() < DRIVER_MISTAKE_PROBABILITY)
     {
         _driverMistakes++;
-        Wait(Exponential(DRIVER_MISTAKE_TIME));  // ridic udelal chybu pri dovazce
+        Wait(Lim(Exponential(DRIVER_MISTAKE_TIME), 0, DRIVER_MISTAKE_TIME * 4).Value());  // ridic udelal chybu pri dovazce
     }
 
-    if (_MyDriver == CarDriver && Generator::IsIncreasedTrafic(Time) && Random() < TRAFIC_JAM_PROBABILITY)
+    if (_MyDriver == CarDriver && Generator::IsIncreasedTraffic(Time) && Random() < TRAFFIC_JAM_PROBABILITY)
     {
         // Orders is delivered in a car and hits traffic jam, the delivery time is doubled.
-        Wait(Normal(travelTime * 2, travelTime / 2.0));
+        Wait(Lim(Normal(travelTime * 1.5, travelTime / 2.0), 0, 4*travelTime).Value());
     }
     else
     {
         // normal delivery time
-        Wait(Normal(travelTime, travelTime / 4.0));
+        Wait(Lim(Normal(travelTime, travelTime / 4.0), 0, travelTime * 4).Value());
     }
 }
 
@@ -332,7 +333,7 @@ void Order::PaymentDelay()
     {
         Wait(CASH_PAYMENT_DELAY);
     }
-    else if (rand <= PAIED_IN_ADVANCED_PROBABILITY)
+    else if (rand <= PAID_IN_ADVANCED_PROBABILITY)
     {
         Wait(CARD_PAYMENT_DELAY);
     }
@@ -341,21 +342,21 @@ void Order::PaymentDelay()
 
 void Order::CheckQuality(unsigned orderNumber)
 {
-    // some driver is collecting orders and the first order is waiting for too long (second, third, ...) orders cannot 
+    // some driver is collecting orders and the first order is waiting for too long (second, third, ...) orders cannot
     // wait longer than the first one.
     if ((_pickingUpOrders == CarDriver || _pickingUpOrders == BikeRider) && *_preparedForPickupQueue->front()->OrderNumber == orderNumber)
     {
-        _preparedForPickupQueue->front()->StartImmidiateDelivery();     // driver leaves without filling its full capacity
+        _preparedForPickupQueue->front()->StartImmediateDelivery();     // driver leaves without filling its full capacity
     }
 
     _orderQualityCheckDone = orderNumber;   // orders up to this order number were checked for quality
 }
 
-void Order::StartImmidiateDelivery()
+void Order::StartImmediateDelivery()
 {
     _preparedForPickupQueue->front()->StartDelivery(_preparedForPickupQueue); // delivery of the first order in the batch starts
     _preparedForPickupQueue->pop();
-    _pickingUpOrders = Unset;   // driver leaves  
+    _pickingUpOrders = Unset;   // driver leaves
 }
 
 
