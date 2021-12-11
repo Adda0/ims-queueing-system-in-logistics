@@ -14,7 +14,7 @@ OBJ = ${SRC:.cpp=.o}
 DEPS = ${OBJ:.o=.d}
 DIR_OBJ = $(addprefix $(BUILD_DIR), $(OBJ))
 DIR_DEPS = $(addprefix $(BUILD_DIR), $(DEPS))
-LIBS = /usr/local/lib/libsimlib.so -lm
+LIBS = -lsimlib -lm
 
 .PHONY: all clean
 
