@@ -19,15 +19,15 @@
 
 using namespace std;
 
-#define NUMBER_OF_CARS_DEFAULT 3
-#define NUMBER_OF_BIKES_DEFAULT 3
+#define NUMBER_OF_CARS_DEFAULT 4
+#define NUMBER_OF_BIKES_DEFAULT 1
 
 class Program
 {
 private:
     static unsigned _cars;
     static unsigned _bikes;
-    
+
     static void ParseArguments(int argc, char **argv);
     static void HelpMessage();
 

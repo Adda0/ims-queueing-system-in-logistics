@@ -9,16 +9,16 @@
 #include "orders.h"
 
 unsigned Generator::orderSpan(ORDER_SPAN_DEFAULT);
-unsigned Generator::orderSpanRush(ORDER_SPAN_RUSH_DEFAULT);
+unsigned Generator::orderSpanRushHour(ORDER_SPAN_RUSH_DEFAULT);
 
 void Generator::Behavior()
 {
-    Order *order = new Order();
+    auto *order = new Order();
     order->Activate();
 
     if (Time >= RUSH_HOUR_START && Time < RUSH_HOUR_END)    // rush hour
     {
-        Activate(Time + Exponential(orderSpanRush));
+        Activate(Time + Exponential(orderSpanRushHour));
     }
     else if (Time <= OPENING_HOURS)  // normal delivery time
     {
@@ -26,9 +26,9 @@ void Generator::Behavior()
     }
 }
 
-bool Generator::IsIncreasedTrafic(unsigned time)
+bool Generator::IsIncreasedTraffic(unsigned time)
 {
-    if (time >= INCREASED_TRAFIC_START && time < INCREASED_TRAFIC_END)
+    if (time >= INCREASED_TRAFFIC_START && time < INCREASED_TRAFFIC_END)
     {
         return true;
     }
@@ -36,3 +36,11 @@ bool Generator::IsIncreasedTrafic(unsigned time)
     return false;
 }
 
+void Generator::SetOrderSpans(unsigned orderSpanPar, unsigned orderSpanRushHourPar)
+{
+    orderSpan = orderSpanPar;
+    if (orderSpanRushHourPar == 0) // Span between orders during rush hour not set, calculated as half of the normal span.
+    {
+        orderSpanRushHour = orderSpanPar >> 1;
+    }
+}
