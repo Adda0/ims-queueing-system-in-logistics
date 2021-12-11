@@ -1,3 +1,10 @@
+//===============================================================================================================
+// File:        orders.cpp
+// Project:     VUT, FIT, IMS, Queueing system in logistics
+// Date:        11. 12. 2021
+// Authors:     David Chocholatý (xchoch08@stud.fit.vutbr.cz), David Mihola (xmihol00@stud.fit.vutbr.cz)
+//===============================================================================================================
+
 #include "orders.h"
 
 Queue Order::_waitingOrdersQueue("Orders waiting for a driver.");
@@ -42,15 +49,13 @@ void Order::Behavior()
         
         _totalExpenses += averageExpense;
         Wait(Normal(preparationTime, preparationTime / 4.0));        // cooking and preparation
-
-        if (Random() < COOK_MISTAKE_PROBABILITY) // Cook makes a mistake and the meal must be prepared again
+        if (Priority == 0 && Random() < COOK_MISTAKE_PROBABILITY)    // Cook makes a mistake and the meal must be prepared again
         {
             _cookMistakes++;
             _totalExpenses += averageExpense;
             Wait(Normal(preparationTime, preparationTime / 4.0));
         }
-
-        
+ 
         (new QualityControl(_OrderNumber))->Activate();              // starting the quality check
 
         if (Cars::cars->Full() && Bikes::bikes->Full()) 
@@ -69,7 +74,7 @@ void Order::Behavior()
     }
     while (_OrderNumber <= _orderQualityCheckDone); // order was not picked up by driver at all yet, quality check failed, must be remade
     
-    _driverPreparationFacility.Seize(this);     // order is being packet
+    _driverPreparationFacility.Seize(this);         // order is being packet
 
     if (_pickingUpOrders == BikeRider)              // bike rider is picking 2 orders at once
     {
@@ -134,7 +139,7 @@ void Order::Behavior()
         else
         {
             _pickingUpOrders = _MyDriver;
-            NextOrder();                                          // driver can take more orders
+            NextOrder();    // driver can take more orders
             Passivate();
         }
     }
@@ -305,7 +310,7 @@ void Order::DeliveryDelay()
     if (_MyDriver == CarDriver && Generator::IsIncreasedTrafic(Time) && Random() < TRAFIC_JAM_PROBABILITY)
     {
         // Orders is delivered in a car and hits traffic jam, the delivery time is doubled.
-        Wait(Normal(travelTime, travelTime / 4.0));
+        Wait(Normal(travelTime * 2, travelTime / 2.0));
     }
     else
     {
@@ -331,6 +336,7 @@ void Order::PaymentDelay()
     {
         Wait(CARD_PAYMENT_DELAY);
     }
+    // else the order was paid in advance, therfore no delay
 }
 
 void Order::CheckQuality(unsigned orderNumber)
