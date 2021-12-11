@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -18,14 +19,14 @@ template <typename T> class Drivers
 {
 protected:
     static Store _store;
-    
+
 public:
     static void Init(unsigned long capacity);
     static void Enqueue(Process &process);
     static void Take(Process &process);
     static void Deliver(Process &process);
     static void TakeNext();
-    static void Stats();  
+    static void Stats();
 };
 
 class Cars : public Drivers<Cars>
