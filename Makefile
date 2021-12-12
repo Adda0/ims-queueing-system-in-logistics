@@ -5,6 +5,8 @@
 # Authors:     David Chocholatý (xchoch08@stud.fit.vutbr.cz), David Mihola (xmihol00@stud.fit.vutbr.cz)
 #===============================================================================================================
 
+ARCHIVE_NAME="11_xmihol00_xchoch08.zip"
+
 .PHONY: all clean run pack
 
 all:
@@ -17,4 +19,6 @@ clean:
 	@rm -rf model build 
 
 pack:
-	echo "TODO" ##tar -cvf ...
+	rm -f $(ARCHIVE_NAME);
+	zip $(ARCHIVE_NAME) src/* src/graphs/* Makefile studie.pdf
+
