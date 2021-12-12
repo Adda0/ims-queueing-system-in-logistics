@@ -9,7 +9,6 @@
 # authors: David Chocholatý (xchoch08), David Mihola (xmihol00), FIT BUT
 
 from matplotlib import pyplot as plt
-from matplotlib import dates as matdates
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -61,12 +60,7 @@ def plot_graph(df: pd.DataFrame, fig_location: str = None, show_figure: bool = F
     sbg.set_axis_labels("Čas od začátku směny (min)", "Počet rozvážejících řidičů")
     sbg.despine()
     sbg._legend.set_title("Druh vozidla")
-    # sbg.tight_layout()
-    # fig = sbg.fig
-    # fig.suptitle("Povětrnostní podmínky v jednotlivých měsících")
     axis = sbg.axes.flat
-    # xformatter = matdates.DateFormatter("%m/%y")
-    # axis[0].xaxis.set_major_formatter(xformatter)
     for ax in axis:
         ax.tick_params(bottom=True, left=True, labelleft=True, labelbottom=True)
 
@@ -82,5 +76,5 @@ if __name__ == "__main__":
     Runs the main script operations when run as a standalone script.
     """
     filename = sys.argv[1]
-    df = get_dataframe(f"{filename}.csv", True)
+    df = get_dataframe(f"{filename}.csv", False)
     plot_graph(df, fig_location=f"{filename}.png", show_figure=False)
